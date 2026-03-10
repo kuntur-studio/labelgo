@@ -1,0 +1,22 @@
+{
+  "short_name": "LabelGo",
+  "name": "LabelGo - Impresión de Etiquetas",
+  "icons": [
+    {
+      "src": "assets/img/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "assets/img/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#2b3a67",
+  "display": "standalone",
+  "scope": "./",
+  "theme_color": "#2b3a67",
+  "description": "Escaneo y generación de etiquetas para repositores."
+}
