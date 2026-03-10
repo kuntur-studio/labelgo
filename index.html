@@ -6,118 +6,172 @@
   <title>LabelGo</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/framework7@8/framework7-bundle.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/framework7-icons/css/framework7-icons.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
   <style>
-    :root { --f7-theme-color: #2b3a67; }
-
-    /* Fondo exacto según diseño */
-    .page-content {
-      background: url('assets/img/background.png') no-repeat center center;
-      background-size: cover;
+    :root {
+      --f7-theme-color: #2b3a67;
+      --blue-nfm: #2b3a67;
+      --green-nfm: #5cb85c;
     }
 
-    .navbar .title {
-      font-weight: 800;
-      color: var(--f7-theme-color);
-      font-size: 26px;
+    body { margin: 0; padding: 0; background-color: #fff; font-family: 'Roboto', sans-serif; }
+
+    /* Cabecera Azul */
+    .header-nfm {
+      background-color: var(--blue-nfm);
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .header-nfm h1 {
+      color: white;
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
       text-transform: none;
     }
 
-    /* Contenedor de botones para que floten sobre la imagen */
-    .controls-container {
-      position: absolute;
-      bottom: 100px;
-      width: 100%;
+    /* Cuerpo Blanco con Botones */
+    .body-nfm {
+      background-color: white;
+      padding: 35px 0;
       display: flex;
       justify-content: center;
-      gap: 40px;
+      gap: 45px;
     }
 
+    /* Estilo Circular Android con elevación */
     .btn-circle {
-      width: 80px;
-      height: 80px;
+      width: 75px;
+      height: 75px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       border: none;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+      color: white;
       cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      position: relative;
+      overflow: hidden; /* Para el efecto ripple de Android */
+      transition: background-color 0.2s;
     }
 
-    .btn-sync { background-color: #4CAF50; color: white; }
-    .btn-scan { background-color: var(--f7-theme-color); color: white; }
+    .btn-sync { background-color: var(--green-nfm); }
+    .btn-scan { background-color: var(--blue-nfm); }
+    
+    /* Iconos */
+    .btn-circle i { font-size: 32px; }
 
-    /* Engranaje discreto */
+    /* Imagen del Repositor con sombreado */
+    .footer-img-container {
+      flex-grow: 1;
+      width: 100%;
+      position: relative;
+      background-color: #eee;
+    }
+
+    .repositor-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      box-shadow: inset 0 10px 15px -10px rgba(0,0,0,0.5);
+    }
+
+    /* Engranaje Config (Estilo Android FAB) */
     .config-btn {
-      position: fixed;
-      right: 20px;
-      bottom: 20px;
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      background: white;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       color: #555;
-      font-size: 32px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.3);
     }
 
-    /* El lector se oculta visualmente o se superpone brevemente */
+    .page-content {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      padding: 0 !important;
+    }
+
+    /* Lector de cámara superpuesto */
     #reader {
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 80%;
-      max-width: 300px;
-      z-index: 1000;
-      border-radius: 20px;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 5000;
+      background: black;
       display: none;
-      box-shadow: 0 0 0 500px rgba(0,0,0,0.5); /* Oscurece el resto al escanear */
     }
   </style>
 </head>
-<body>
+<body class="color-theme-blue">
   <div id="app">
     <div class="view view-main">
-      <div class="page">
-        <div class="navbar no-hairline no-shadow">
-          <div class="navbar-inner justify-content-center">
-            <div class="title">LabelGo</div>
-          </div>
-        </div>
-
+      <div class="page" data-name="home">
         <div class="page-content">
-          <div id="reader"></div>
+          
+          <div class="header-nfm">
+            <h1>LabelGo</h1>
+          </div>
 
-          <div class="controls-container">
-            <button class="btn-circle btn-sync" id="btn-sync-action">
+          <div class="body-nfm">
+            <button class="btn-circle btn-sync ripple-color-white" id="btn-sync">
               <i class="f7-icons">arrow_2_circlepath</i>
             </button>
-            <button class="btn-circle btn-scan" id="btn-scan-action">
+            <button class="btn-circle btn-scan ripple-color-white" id="btn-scan">
               <i class="f7-icons">barcode_viewfinder</i>
             </button>
           </div>
 
-          <a href="#" class="config-btn sheet-open" data-sheet=".config-sheet">
-            <i class="f7-icons">gear_alt_fill</i>
-          </a>
+          <div class="footer-img-container">
+            <img src="assets/img/background.png" class="repositor-img" alt="Repositor">
+            
+            <a href="#" class="config-btn sheet-open ripple-color-gray" data-sheet=".config-sheet">
+              <i class="f7-icons">gear_alt_fill</i>
+            </a>
+          </div>
+
         </div>
 
-        <div class="sheet-modal config-sheet" style="height: auto; border-radius: 20px 20px 0 0;">
+        <div id="reader"></div>
+
+        <div class="sheet-modal config-sheet" style="height: auto; --f7-sheet-border-radius: 16px 16px 0 0;">
           <div class="sheet-modal-inner">
             <div class="block">
-              <h3>Configuración de Datos</h3>
+              <div class="display-flex justify-content-space-between align-items-center">
+                <h3 class="margin-0">Configuración</h3>
+                <a class="link sheet-close" href="#">Cerrar</a>
+              </div>
               <div class="list no-hairlines-md">
                 <ul>
                   <li class="item-content item-input">
                     <div class="item-inner">
-                      <div class="item-title item-label">URL del CSV</div>
+                      <div class="item-title item-label">URL del articulos.csv</div>
                       <div class="item-input-wrap">
-                        <input type="text" id="dbfileurl" placeholder="https://...">
+                        <input type="text" id="url-csv" placeholder="https://nfm.kunturstudio.com.ar/data/articulos.csv">
+                        <span class="input-clear-button"></span>
                       </div>
                     </div>
                   </li>
                 </ul>
               </div>
-              <button class="button button-fill button-large" id="btn-save">Guardar</button>
+              <button class="button button-fill button-large margin-top" id="save-config">Guardar Cambios</button>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
