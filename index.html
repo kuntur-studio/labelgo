@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>LabelGo</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/framework7@8/framework7-bundle.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/framework7-icons/css/framework7-icons.css">
+  <style>
+    :root { --f7-theme-color: #2b3a67; }
+
+    /* Fondo exacto según diseño */
+    .page-content {
+      background: url('assets/img/background.png') no-repeat center center;
+      background-size: cover;
+    }
+
+    .navbar .title {
+      font-weight: 800;
+      color: var(--f7-theme-color);
+      font-size: 26px;
+      text-transform: none;
+    }
+
+    /* Contenedor de botones para que floten sobre la imagen */
+    .controls-container {
+      position: absolute;
+      bottom: 100px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+    }
+
+    .btn-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+      cursor: pointer;
+    }
+
+    .btn-sync { background-color: #4CAF50; color: white; }
+    .btn-scan { background-color: var(--f7-theme-color); color: white; }
+
+    /* Engranaje discreto */
+    .config-btn {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      color: #555;
+      font-size: 32px;
+    }
+
+    /* El lector se oculta visualmente o se superpone brevemente */
+    #reader {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      max-width: 300px;
+      z-index: 1000;
+      border-radius: 20px;
+      display: none;
+      box-shadow: 0 0 0 500px rgba(0,0,0,0.5); /* Oscurece el resto al escanear */
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="view view-main">
+      <div class="page">
+        <div class="navbar no-hairline no-shadow">
+          <div class="navbar-inner justify-content-center">
+            <div class="title">LabelGo</div>
+          </div>
+        </div>
+
+        <div class="page-content">
+          <div id="reader"></div>
+
+          <div class="controls-container">
+            <button class="btn-circle btn-sync" id="btn-sync-action">
+              <i class="f7-icons">arrow_2_circlepath</i>
+            </button>
+            <button class="btn-circle btn-scan" id="btn-scan-action">
+              <i class="f7-icons">barcode_viewfinder</i>
+            </button>
+          </div>
+
+          <a href="#" class="config-btn sheet-open" data-sheet=".config-sheet">
+            <i class="f7-icons">gear_alt_fill</i>
+          </a>
+        </div>
+
+        <div class="sheet-modal config-sheet" style="height: auto; border-radius: 20px 20px 0 0;">
+          <div class="sheet-modal-inner">
+            <div class="block">
+              <h3>Configuración de Datos</h3>
+              <div class="list no-hairlines-md">
+                <ul>
+                  <li class="item-content item-input">
+                    <div class="item-inner">
+                      <div class="item-title item-label">URL del CSV</div>
+                      <div class="item-input-wrap">
+                        <input type="text" id="dbfileurl" placeholder="https://...">
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <button class="button button-fill button-large" id="btn-save">Guardar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/framework7@8/framework7-bundle.min.js"></script>
+  <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+  <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
