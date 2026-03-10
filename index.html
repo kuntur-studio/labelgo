@@ -14,7 +14,6 @@
 
     body { margin: 0; padding: 0; background-color: #fff; font-family: 'Roboto', sans-serif; }
 
-    /* Contenedor principal para forzar los bloques */
     .page-content {
       display: flex;
       flex-direction: column;
@@ -23,7 +22,7 @@
       background-color: white;
     }
 
-    /* 1. Cabecera Azul */
+    /* BLOQUE 1: Cabecera Azul */
     .header-nfm {
       background-color: var(--blue-nfm);
       height: 75px;
@@ -39,7 +38,7 @@
       font-weight: 800;
     }
 
-    /* 2. Cuerpo Blanco con Botones */
+    /* BLOQUE 2: Cuerpo Blanco con Botones */
     .body-nfm {
       padding: 40px 0;
       display: flex;
@@ -66,39 +65,40 @@
     .btn-scan { background-color: var(--blue-nfm); }
     .btn-circle i { font-size: 38px; }
 
-    /* 3. Bloque de Imagen (Repositor) */
-    .img-block {
-      flex-grow: 1; /* Ocupa el espacio disponible entre botones y footer */
+    /* BLOQUE 3: Imagen con márgenes laterales y sombra */
+    .img-container {
+      flex-grow: 1;
       width: 100%;
-      overflow: hidden;
       display: flex;
       align-items: center;
+      justify-content: center;
+      padding: 0 15px; /* Margen a los lados solicitado */
+      box-sizing: border-box;
     }
     .repositor-img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Sombreado de la imagen solicitado */
+      border-radius: 8px; /* Opcional: suaviza esquinas con el margen */
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2); /* Sombreado de la imagen */
     }
 
-    /* 4. Pie de Página Blanco con Engranaje */
+    /* BLOQUE 4: Pie de página blanco */
     .footer-nfm {
       height: 70px;
       background-color: white;
       display: flex;
-      justify-content: flex-end;
+      justify-content: flex-end; /* Alineado a la derecha */
       align-items: center;
-      padding-right: 20px;
+      padding-right: 25px;
       flex-shrink: 0;
     }
 
-    /* Engranaje: Sin fondo, sin sombra, gris */
     .config-btn {
       background: transparent;
       border: none;
-      color: #9e9e9e; /* Gris */
+      color: #9e9e9e;
       font-size: 35px;
-      padding: 10px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -106,7 +106,6 @@
       transition: transform 0.1s;
     }
 
-    /* Lector de cámara superpuesto */
     #reader {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -135,7 +134,7 @@
             </button>
           </div>
 
-          <div class="img-block">
+          <div class="img-container">
             <img src="assets/img/background.png" class="repositor-img" alt="Repositor">
           </div>
 
@@ -149,7 +148,7 @@
 
         <div id="reader"></div>
 
-        <div class="sheet-modal config-sheet" style="height: auto; --f7-sheet-border-radius: 16px 16px 0 0;">
+        <div class="sheet-modal config-sheet" style="height: auto; --f7-sheet-border-radius: 20px 20px 0 0;">
           <div class="sheet-modal-inner">
             <div class="block">
               <div class="display-flex justify-content-space-between align-items-center">
@@ -160,7 +159,7 @@
                 <ul>
                   <li class="item-content item-input">
                     <div class="item-inner">
-                      <div class="item-title item-label">Ruta al archivo articulos.csv</div>
+                      <div class="item-title item-label">Ruta CSV</div>
                       <div class="item-input-wrap">
                         <input type="text" id="url-csv" placeholder="https://...">
                         <span class="input-clear-button"></span>
