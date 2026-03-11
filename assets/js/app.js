@@ -56,19 +56,37 @@ async function syncData() {
 
 const scanner = new Html5Qrcode("reader");
 
-$$('#btn-scan').on('click', () => {
+$$('#btn-scan').on('click', async () => {
   $$('#reader').show();
-  scanner.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, async (decodedText) => {
-    playBeep();
-    await scanner.stop();
-    $$('#reader').hide();
-
-    const prod = await db.products.get({ barcode: decodedText });
-    if (prod) {
-      enviarImpresion(prod);
-    } else {
-      app.toast.create({ text: 'No encontrado', color: 'red' }).open();
+  
+  // 1. Iniciamos el scanner
+  scanner.start(
+    { facingMode: "environment" },
+    { fps: 20, qrbox: 250 },
+    async (decodedText) => {
+      playBeep();
+      await scanner.stop();
+      $$('#reader').hide();
+      
+      const prod = await db.products.get({ barcode: decodedText });
+      if (prod) {
+        enviarImpresion(prod);
+      } else {
+        app.toast.create({ text: 'No encontrado', color: 'red' }).open();
+      }
     }
+  ).then(() => {
+    // 2. Intentamos encender la linterna después de que la cámara esté activa
+    // Verificamos si el scanner tiene capacidad de linterna
+    const track = scanner.getRunningTrackCapabilities();
+    if (track && track.torch) {
+      scanner.applyVideoConstraints({
+        advanced: [{ torch: true }]
+      }).catch(err => console.log("No se pudo forzar la linterna", err));
+    }
+  }).catch(err => {
+    $$('#reader').hide();
+    app.toast.create({ text: 'Error: ' + err, color: 'red' }).open();
   });
 });
 
