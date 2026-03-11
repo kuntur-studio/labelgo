@@ -124,24 +124,31 @@ async function syncData() {
   try {
     const res = await fetch(url);
     const text = await res.text();
+    
     Papa.parse(text, {
+      skipEmptyLines: true, // Evita procesar filas vacías al final del archivo
       complete: async (results) => {
-        const data = results.data.map(r => ({
-          barcode: r?.trim(),
-          name: r?.trim(),
-          price: r?.trim(),
-          reference: r?.trim(),
-          reference_price: r?.trim()
-        }));
+        // Validación robusta: convertimos a string y comprobamos existencia
+        const data = results.data.map(r => {
+          const getVal = (idx) => (r[idx] !== undefined && r[idx] !== null) ? String(r[idx]).trim() : "";
+          return {
+            barcode: getVal(0),
+            name: getVal(1),
+            price: getVal(2),
+            reference: getVal(3),
+            reference_price: getVal(4)
+          };
+        }).filter(item => item.barcode !== ""); // No guardamos registros sin código
+
         await db.products.clear();
         await db.products.bulkPut(data);
         app.preloader.hide();
-        app.toast.create({ text: 'Sincronizado', color: 'green', closeTimeout: 2000 }).open();
+        app.toast.create({ text: 'Sincronizado correctamente', color: 'green', closeTimeout: 2000 }).open();
       }
     });
   } catch (e) {
     app.preloader.hide();
-    app.toast.create({ text: 'Error de red', color: 'red', closeTimeout: 2000 }).open();
+    app.toast.create({ text: 'Error al conectar con el servidor', color: 'red', closeTimeout: 2000 }).open();
   }
 }
 
