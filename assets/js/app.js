@@ -2,14 +2,17 @@ const DB_VERSION = 1;
 
 const app = new Framework7({ 
   el: '#app', 
-  theme: 'md', 
-  touch: { mdTouchRipple: true } 
+  theme: 'md',
+  touch: { tapHold: true, mdTouchRipple: true }
 });
 
 const $$ = Dom7;
-
 const db = new Dexie("LabelGoDB");
-db.version(DB_VERSION).stores({ products: "barcode", config: "key" });
+// Mantenemos los dos almacenes (stores) necesarios
+db.version(DB_VERSION).stores({ 
+  products: "barcode",
+  config: "key" 
+});
 
 db.config.get("dbfileurl").then(cfg => { if (cfg) $$('#url-csv').val(cfg.value); });
 
@@ -24,6 +27,94 @@ function playBeep() {
   gain.gain.linearRampToValueAtTime(0, context.currentTime + 0.2);
   osc.start();
   osc.stop(context.currentTime + 0.2);
+}
+
+const scanner = new Html5Qrcode("reader");
+let isTorchOn = false;
+
+$$('#btn-scan').on('click', async () => {
+  $$('#scanner-container').show();
+  
+  // Recuperar preferencia de linterna de la DB, por defecto false
+  const torchCfg = await db.config.get("torch_enabled");
+  isTorchOn = torchCfg ? torchCfg.value : false;
+  
+  // Actualizar icono visual inicial
+  updateTorchIcon();
+
+  scanner.start(
+    { facingMode: "environment" },
+    { fps: 20, qrbox: 250 },
+    async (decodedText) => {
+      playBeep();
+      stopScanner();
+      const prod = await db.products.get({ barcode: decodedText });
+      if (prod) {
+        enviarImpresion(prod);
+      } else {
+        app.toast.create({ 
+          text: `No encontrado: ${decodedText}`, 
+          color: 'red', 
+          closeTimeout: 3000 
+        }).open();
+      }
+    }
+  ).then(() => {
+    // Aplicar el estado guardado una vez que la cámara inicia
+    applyTorch(isTorchOn);
+  }).catch(err => {
+    stopScanner();
+    app.toast.create({ text: 'Error cámara', color: 'red', closeTimeout: 2000 }).open();
+  });
+});
+
+function stopScanner() {
+  scanner.stop().then(() => {
+    $$('#scanner-container').hide();
+  }).catch(() => {
+    $$('#scanner-container').hide();
+  });
+}
+
+function applyTorch(state) {
+  const track = scanner.getRunningTrackCapabilities();
+  if (track && track.torch) {
+    scanner.applyVideoConstraints({ advanced: [{ torch: state }] });
+  }
+}
+
+function updateTorchIcon() {
+    $$('#btn-toggle-torch i').text(isTorchOn ? 'flashlight_on' : 'flashlight_off');
+}
+
+// Evento Toggle Linterna con PERSISTENCIA
+$$('#btn-toggle-torch').on('click', async () => {
+  isTorchOn = !isTorchOn;
+  
+  // 1. Guardar en Store Config automáticamente
+  await db.config.put({ key: "torch_enabled", value: isTorchOn });
+  
+  // 2. Aplicar al hardware
+  applyTorch(isTorchOn);
+  
+  // 3. Actualizar UI
+  updateTorchIcon();
+});
+
+$$('#btn-cancel-scan').on('click', stopScanner);
+
+function enviarImpresion(p) {
+  const ticket = {
+    "0": { "type": 0, "content": p.name, "bold": 1, "align": 1, "size": 22 },
+    "1": { "type": 0, "content": "\n------------------------------------------\n", "align": 1 },
+    "2": { "type": 0, "content": `$${p.price}`, "bold": 1, "align": 1, "size": 65 },
+    "3": { "type": 0, "content": "\n", "align": 1 },
+    "4": { "type": 2, "value": p.barcode, "width": 2, "height": 70, "align": 1, "pos": 2 },
+    "5": { "type": 0, "content": `Ref: ${p.reference} | Bulto: $${p.reference_price}`, "bold": 0, "align": 1, "size": 16 },
+    "6": { "type": 0, "content": "\n\n\n", "align": 1 }
+  };
+  const payload = encodeURIComponent(JSON.stringify(ticket));
+  window.location.href = `my.bluetoothprint.scheme://?url=https://nfm.kunturstudio.com.ar/print_helper.php?json=${payload}`;
 }
 
 async function syncData() {
@@ -50,58 +141,8 @@ async function syncData() {
     });
   } catch (e) {
     app.preloader.hide();
-    app.toast.create({ text: 'Error de red', color: 'red' }).open();
+    app.toast.create({ text: 'Error de red', color: 'red', closeTimeout: 2000 }).open();
   }
-}
-
-const scanner = new Html5Qrcode("reader");
-
-$$('#btn-scan').on('click', async () => {
-  $$('#reader').show();
-  
-  // 1. Iniciamos el scanner
-  scanner.start(
-    { facingMode: "environment" },
-    { fps: 20, qrbox: 250 },
-    async (decodedText) => {
-      playBeep();
-      await scanner.stop();
-      $$('#reader').hide();
-      
-      const prod = await db.products.get({ barcode: decodedText });
-      if (prod) {
-        enviarImpresion(prod);
-      } else {
-        app.toast.create({ text: 'No encontrado', color: 'red' }).open();
-      }
-    }
-  ).then(() => {
-    // 2. Intentamos encender la linterna después de que la cámara esté activa
-    // Verificamos si el scanner tiene capacidad de linterna
-    const track = scanner.getRunningTrackCapabilities();
-    if (track && track.torch) {
-      scanner.applyVideoConstraints({
-        advanced: [{ torch: true }]
-      }).catch(err => console.log("No se pudo forzar la linterna", err));
-    }
-  }).catch(err => {
-    $$('#reader').hide();
-    app.toast.create({ text: 'Error: ' + err, color: 'red' }).open();
-  });
-});
-
-function enviarImpresion(p) {
-  const ticket = {
-    "0": { "type": 0, "content": p.name, "bold": 1, "align": 1, "size": 22 },
-    "1": { "type": 0, "content": "\n------------------------------------------\n", "align": 1 },
-    "2": { "type": 0, "content": `$${p.price}`, "bold": 1, "align": 1, "size": 65 },
-    "3": { "type": 0, "content": "\n", "align": 1 },
-    "4": { "type": 2, "value": p.barcode, "width": 2, "height": 70, "align": 1, "pos": 2 },
-    "5": { "type": 0, "content": `Ref: ${p.reference} | Bulto: $${p.reference_price}`, "bold": 0, "align": 1, "size": 16 },
-    "6": { "type": 0, "content": "\n\n\n", "align": 1 }
-  };
-  const payload = encodeURIComponent(JSON.stringify(ticket));
-  window.location.href = `my.bluetoothprint.scheme://?url=https://nfm.kunturstudio.com.ar/print_helper.php?json=${payload}`;
 }
 
 $$('#btn-sync').on('click', syncData);

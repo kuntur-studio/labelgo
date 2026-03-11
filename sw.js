@@ -8,6 +8,8 @@ const ASSETS = [
   './assets/img/icon-192.png',
   'https://cdn.jsdelivr.net/npm/framework7@8/framework7-bundle.min.css',
   'https://cdn.jsdelivr.net/npm/framework7-icons/css/framework7-icons.css',
+  'https://fonts.googleapis.com/icon?family=Material+Icons',
+  'https://cdn.jsdelivr.net/npm/framework7@8/framework7-bundle.min.js',
   'https://unpkg.com/dexie/dist/dexie.js',
   'https://unpkg.com/papaparse@5.4.1/papaparse.min.js',
   'https://unpkg.com/html5-qrcode'
