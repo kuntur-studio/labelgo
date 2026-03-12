@@ -15,7 +15,7 @@ $ref_text = clean($p['reference']);
 $name = strtoupper(clean($p['name']));
 $barcode = clean($p['barcode']);
 
-$width = "58mm"; 
+$width = "50mm"; 
 
 // 1. CABECERA: Padding lateral cero
 $html_header = "<div style='width:$width; background-color:#000; color:#fff; padding:1.5mm; font-size:3.5mm; font-weight:bold; text-align:center; box-sizing:border-box;'>" . 
