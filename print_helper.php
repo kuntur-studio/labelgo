@@ -47,4 +47,4 @@ $response = [
     "3" => ["type" => 0, "content" => "\n\n\n", "align" => 1] // Espacio de corte
 ];
 
-echo json_encode($response);
+echo json_encode($response, JSON_FORCE_OBJECT);
