@@ -63,7 +63,8 @@ $response = [
 
 // JSON_UNESCAPED_SLASHES para evitar las barras en </div>
 //echo json_encode($response, JSON_FORCE_OBJECT | JSON_UNESCAPED_SLASHES);
-echo "{
+$doc = <<<DOC
+{
     "0": {
         "type": 4,
         "content": "<div style='width:100%; text-align:center;'><img src='https://kuntur-studio.github.io/scannprintlabel/test_img5.png' style='width:380px; height:auto;'></div>"
@@ -75,4 +76,6 @@ echo "{
         "align": 0,
         "format": 0
     }
-}";
+}
+DOC;
+echo $doc;
