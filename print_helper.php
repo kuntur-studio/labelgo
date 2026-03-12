@@ -62,4 +62,17 @@ $response = [
 ];
 
 // JSON_UNESCAPED_SLASHES para evitar las barras en </div>
-echo json_encode($response, JSON_FORCE_OBJECT | JSON_UNESCAPED_SLASHES);
+//echo json_encode($response, JSON_FORCE_OBJECT | JSON_UNESCAPED_SLASHES);
+echo "{
+    "0": {
+        "type": 4,
+        "content": "<div style='width:100%; text-align:center;'><img src='https://kuntur-studio.github.io/scannprintlabel/test_img5.png' style='width:380px; height:auto;'></div>"
+    },
+    "1": {
+        "type": 0,
+        "content": "\n\n",
+        "bold": 0,
+        "align": 0,
+        "format": 0
+    }
+}";
