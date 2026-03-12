@@ -104,16 +104,10 @@ $$('#btn-toggle-torch').on('click', async () => {
 $$('#btn-cancel-scan').on('click', stopScanner);
 
 function enviarImpresion(p) {
-  const ticket = {
-    "0": { "type": 0, "content": p.name, "bold": 1, "align": 1, "size": 22 },
-    "1": { "type": 0, "content": "\n------------------------------------------\n", "align": 1 },
-    "2": { "type": 0, "content": `$${p.price}`, "bold": 1, "align": 1, "size": 65 },
-    "3": { "type": 0, "content": "\n", "align": 1 },
-    "4": { "type": 2, "value": p.barcode, "width": 2, "height": 70, "align": 1, "pos": 2 },
-    "5": { "type": 0, "content": `Ref: ${p.reference} | Bulto: $${p.reference_price}`, "bold": 0, "align": 1, "size": 16 },
-    "6": { "type": 0, "content": "\n\n\n", "align": 1 }
-  };
-  const payload = encodeURIComponent(JSON.stringify(ticket));
+  // Enviamos el objeto producto completo y crudo (barcode, name, price, reference, reference_price)
+  const payload = encodeURIComponent(JSON.stringify(p));
+  
+  // Se invoca al esquema de la app bridge apuntando al nuevo print_helper.php
   window.location.href = `my.bluetoothprint.scheme://?url=https://nfm.kunturstudio.com.ar/print_helper.php?json=${payload}`;
 }
 
