@@ -47,9 +47,20 @@ $html_footer = "<div style='width:$width; border-top:2px solid #000; padding-top
 
 $response = [
     "0" => ["type" => 4, "content" => $html_header],
-    /*"1" => ["type" => 4, "content" => $html_price],
-    "2" => ["type" => 4, "content" => $html_footer],*/
+    "1" => ["type" => 4, "content" => $html_price],
+    "2" => ["type" => 4, "content" => $html_footer],
     "3" => ["type" => 0, "content" => "\n\n\n", "align" => 1]
+];
+
+//DEBUG
+
+$html_header = "<div style='width:$width; background-color:#222; color:#fff; padding:8px 10px; box-sizing:border-box; $font'>" .
+               "<div style='font-size:19px; font-weight:900; line-height:1.1; text-align:left; text-transform:uppercase;'>" . 
+               htmlspecialchars($name) . 
+               "</div></div>";
+$response = [
+    "0" => ["type" => 4, "content" => $html_header],
+    "1" => ["type" => 0, "content" => "\n\n\n", "align" => 1]
 ];
 
 // JSON_UNESCAPED_SLASHES para evitar las barras en </div>
