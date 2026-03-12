@@ -112,8 +112,8 @@ function enviarImpresion(p) {
 }
 
 async function syncData() {
-  const url = $$('#url-csv').val();
-  if (!url) return;
+  const baseUrl = $$('#url-csv').val();
+  if (!baseUrl) return;
   app.preloader.show();
   try {
     const separator = baseUrl.includes('?') ? '&' : '?';
