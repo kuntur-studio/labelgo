@@ -5,38 +5,46 @@ header('Access-Control-Allow-Origin: *');
 $json_data = isset($_GET['json']) ? $_GET['json'] : '';
 $p = json_decode($json_data, true);
 
-if (!$p) exit;
+if (!$p) {
+    echo json_encode(["0" => ["type" => 0, "content" => "Error: Datos vacíos"]]);
+    exit;
+}
 
-function clean($val) { return str_replace(['"', '\\'], '', $val); }
+// Configuración para 58mm -> Usamos 56mm para margen de seguridad físico
+$width = "56mm";
+$font = "font-family: Arial, sans-serif;";
 
-$price = clean($p['price']);
-$ref_price = clean($p['reference_price']);
-$ref_text = clean($p['reference']);
-$name = strtoupper(clean($p['name']));
-$barcode = clean($p['barcode']);
+// 1. CABECERA
+$html_header = "
+<div style='width: $width; background-color: #000; color: #fff; padding: 2mm 3mm; box-sizing: border-box; $font'>
+    <div style='font-size: 5mm; font-weight: 900; line-height: 1.1; text-align: left; text-transform: uppercase;'>
+        " . htmlspecialchars($p['name']) . "
+    </div>
+</div>";
 
-// Área imprimible total 50mm
-$width = "50mm"; 
+// 2. PRECIO
+// Usamos mm en lugar de px para que el tamaño sea real en el papel
+$price_font_size = (strlen($p['price']) > 7) ? "20mm" : "25mm";
+$html_price = "
+<div style='width: $width; text-align: center; padding: 4mm 0; box-sizing: border-box; $font'>
+    <span style='font-size: $price_font_size; font-weight: 800; letter-spacing: -0.5mm;'>
+        $" . $p['price'] . "
+    </span>
+</div>";
 
-$full_html = "<div style='width:$width; font-family:Arial,sans-serif; color:#000; box-sizing:border-box; padding:1mm;'>";
-    
-    // 1. Cabecera (Nombre): Fondo negro, texto blanco, ocupa ancho completo
-    $full_html .= "<div style='background-color:#000; color:#fff; padding:1.5mm; font-size:3.5mm; font-weight:bold; line-height:1.1; word-wrap:break-word; text-align:center;'>" . htmlspecialchars($name) . "</div>";
-    
-    // 2. Precio: Grande, centrado, tipografía pesada
-    $full_html .= "<div style='text-align:center; padding:3mm 0; font-size:10mm; font-weight:900; line-height:1;'>$" . $price . "</div>";
-    
-    // 3. Footer: Código y Referencia en una línea
-    $full_html .= "<div style='border-top:0.4mm solid #000; padding-top:1mm; display:flex; justify-content:space-between; align-items:center;'>";
-        $full_html .= "<div style='font-size:3.5mm; font-weight:bold;'>" . $barcode . "</div>";
-        $full_html .= "<div style='font-size:3mm;'>" . $ref_text . ": $" . $ref_price . "</div>";
-    $full_html .= "</div>";
+// 3. FOOTER
+$html_footer = "
+<div style='width: $width; display: flex; justify-content: space-between; align-items: flex-end; padding: 1mm 3mm; border-top: 0.5mm solid #000; box-sizing: border-box; $font'>
+    <span style='font-size: 5mm; font-weight: bold;'>" . $p['barcode'] . "</span>
+    <span style='font-size: 4mm;'>" . htmlspecialchars($p['reference']) . ": $" . $p['reference_price'] . "</span>
+</div>";
 
-$full_html .= "</div>";
-
+// JSON_UNESCAPED_SLASHES para que el HTML no se ensucie con barras invertidas
 $response = [
-    "0" => ["type" => 4, "content" => $full_html],
-    "1" => ["type" => 0, "content" => "\n\n", "align" => 1]
+    "0" => ["type" => 4, "content" => $html_header],
+    "1" => ["type" => 4, "content" => $html_price],
+    "2" => ["type" => 4, "content" => $html_footer],
+    "3" => ["type" => 0, "content" => "\n\n", "align" => 1]
 ];
 
-echo json_encode($response, JSON_FORCE_OBJECT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+echo json_encode($response, JSON_FORCE_OBJECT | JSON_UNESCAPED_SLASHES);
