@@ -47,8 +47,8 @@ $html_footer = "<div style='width:$width; border-top:2px solid #000; padding-top
 
 $response = [
     "0" => ["type" => 4, "content" => $html_header],
-    "1" => ["type" => 4, "content" => $html_price],
-    "2" => ["type" => 4, "content" => $html_footer],
+    /*"1" => ["type" => 4, "content" => $html_price],
+    "2" => ["type" => 4, "content" => $html_footer],*/
     "3" => ["type" => 0, "content" => "\n\n\n", "align" => 1]
 ];
 
