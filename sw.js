@@ -1,7 +1,9 @@
 const CACHE_NAME = 'labelgo-v1';
+
 const ASSETS = [
   './',
   './index.html',
+  './manifest.json',
   './assets/js/app.js',
   './assets/img/background.png',
   './assets/img/icon-512.png',
@@ -16,12 +18,13 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', e => {
-  self.skipWaiting(); // Fuerza la instalación inmediata
-  e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
+  self.skipWaiting(); 
+  e.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+  );
 });
 
 self.addEventListener('activate', e => {
-  // Limpia cachés antiguas automáticamente
   e.waitUntil(
     caches.keys().then(keys => Promise.all(
       keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
@@ -31,6 +34,8 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(response => response || fetch(e.request))
+    caches.match(e.request).then(response => {
+      return response || fetch(e.request);
+    })
   );
 });
