@@ -54,10 +54,9 @@ $response = [
 
 //DEBUG
 
-$html_header = "<div style='width:$width; background-color:#222; color:#fff; padding:8px 10px; box-sizing:border-box; $font'>" .
-               "<div style='font-size:19px; font-weight:900; line-height:1.1; text-align:left; text-transform:uppercase;'>" . 
+$html_header = "<div style='font-size:19px; font-weight:900; line-height:1.1; text-align:left; text-transform:uppercase;'>" . 
                htmlspecialchars($name) . 
-               "</div></div>";
+               "</div>";
 $response = [
     "0" => ["type" => 4, "content" => $html_header]
 ];
