@@ -2,7 +2,7 @@
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 
-/*$json_data = isset($_GET['json']) ? $_GET['json'] : '';
+$json_data = isset($_GET['json']) ? $_GET['json'] : '';
 $p = json_decode($json_data, true);
 
 if (!$p) exit;
@@ -44,5 +44,4 @@ $response = [
     "3" => ["type" => 0, "content" => "\n\n\n", "align" => 1]
 ];
 
-echo json_encode($response, JSON_FORCE_OBJECT);*/
-echo '{"0":{"type":4,"content":"<div style=\'width:50mm; background-color:#000; color:#fff; padding:1.5mm 0; font-size:3.5mm; font-weight:bold; text-align:center; box-sizing:border-box;\'>OKEBON MOLINO 10 SEMILLAS 231 G</div>"},"1":{"type":4,"content":"<div style=\'width:50mm; text-align:center; padding:2mm 0; font-size:8mm; font-weight:900; line-height:1; box-sizing:border-box;\'>$1.920,00</div>"},"2":{"type":4,"content":"<div style=\'width:50mm; border-top:0.4mm solid #000; padding:1mm 0; display:flex; justify-content:space-between; align-items:center; box-sizing:border-box;\'><div style=\'font-size:3mm; font-weight:bold;\'>779026311965</div><div style=\'font-size:2.8mm; text-align:right;\'>Ref. x 100 gramos: $831</div></div>"},"3":{"type":0,"content":"\n\n\n","align":1}}';
+echo json_encode($response, JSON_FORCE_OBJECT);
