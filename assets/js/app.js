@@ -116,7 +116,10 @@ async function syncData() {
   if (!url) return;
   app.preloader.show();
   try {
-    const res = await fetch(url);
+    const separator = baseUrl.includes('?') ? '&' : '?';
+    const urlConCacheBust = `${baseUrl}${separator}t=${Date.now()}`;
+    
+    const res = await fetch(urlConCacheBust);
     const text = await res.text();
     
     Papa.parse(text, {
