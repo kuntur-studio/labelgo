@@ -54,7 +54,7 @@ $response = [
 
 //DEBUG
 
-$html_header = "<div style='font-size:19px; font-weight:900; text-align:left;'>" . 
+$html_header = "<div style='text-align:left;'>" . 
                htmlspecialchars($name) . 
                "</div>";
 $response = [
