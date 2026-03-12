@@ -44,4 +44,4 @@ $response = [
     "3" => ["type" => 0, "content" => "\n\n\n", "align" => 1]
 ];
 
-echo json_encode($response, JSON_FORCE_OBJECT | JSON_UNESCAPED_SLASHES);
+echo json_encode($response, JSON_FORCE_OBJECT);
