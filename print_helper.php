@@ -59,8 +59,7 @@ $html_header = "<div style='width:$width; background-color:#222; color:#fff; pad
                htmlspecialchars($name) . 
                "</div></div>";
 $response = [
-    "0" => ["type" => 4, "content" => $html_header],
-    "1" => ["type" => 0, "content" => "\n\n\n", "align" => 1]
+    "0" => ["type" => 4, "content" => $html_header]
 ];
 
 // JSON_UNESCAPED_SLASHES para evitar las barras en </div>
