@@ -25,7 +25,7 @@ $html_header = "<div style='width:$width; background-color:#000; color:#fff; pad
 // 2. PRECIO: Dinámico en mm
 $price_len = strlen($price);
 // Si es muy largo (>8 caracteres), reducimos el tamaño a 10mm, sino 12mm
-$f_size = ($price_len > 8) ? "10mm" : "12mm";
+$f_size = ($price_len > 8) ? "9mm" : "11mm";
 
 $html_price = "<div style='width:$width; text-align:center; padding:2mm 0; font-size:$f_size; font-weight:900; line-height:1; box-sizing:border-box;'>" . 
               "$" . $price . 
