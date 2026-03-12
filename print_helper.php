@@ -2,49 +2,41 @@
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 
-// Recibimos el objeto producto crudo desde la PWA
 $json_data = isset($_GET['json']) ? $_GET['json'] : '';
 $p = json_decode($json_data, true);
 
-if (!$p) {
-    echo json_encode(["0" => ["type" => 0, "content" => "Error: Datos vacíos"]]);
-    exit;
-}
+if (!$p) exit;
 
-// Configuración para 58mm (384px de ancho)
-$width = "384px";
-$font = "font-family: 'Helvetica', 'Arial', sans-serif;";
+function clean($val) { return str_replace(['"', '\\'], '', $val); }
 
-// 1. CABECERA (Gris oscuro/Negro) - Soporta hasta 3 líneas para nombres de 60 caracteres
-$html_header = "
-<div style='width: $width; background-color: #222; color: #fff; padding: 6px 10px; box-sizing: border-box; $font'>
-    <div style='font-size: 18px; font-weight: 900; line-height: 1.1; text-align: left; text-transform: uppercase;'>
-        " . htmlspecialchars($p['name']) . "
-    </div>
-</div>";
+$price = clean($p['price']);
+$ref_price = clean($p['reference_price']);
+$ref_text = clean($p['reference']);
+$name = strtoupper(clean($p['name']));
+$barcode = clean($p['barcode']);
 
-// 2. PRECIO (Cuerpo) - Ajuste dinámico para precios largos
-$price_font_size = (strlen($p['price']) > 7) ? "70px" : "85px";
-$html_price = "
-<div style='width: $width; text-align: center; padding: 15px 0; box-sizing: border-box; $font'>
-    <span style='font-size: $price_font_size; font-weight: 800; letter-spacing: -2px;'>
-        $" . $p['price'] . "
-    </span>
-</div>";
+// Área imprimible total 50mm
+$width = "50mm"; 
 
-// 3. FOOTER (Extremos) - Código y Referencia
-$html_footer = "
-<div style='width: $width; display: flex; justify-content: space-between; align-items: flex-end; padding: 5px 10px; border-top: 1.5px solid #000; box-sizing: border-box; $font'>
-    <span style='font-size: 19px; font-weight: bold;'>" . $p['barcode'] . "</span>
-    <span style='font-size: 17px;'>Ref.x 100g: $" . $p['reference_price'] . "</span>
-</div>";
+$full_html = "<div style='width:$width; font-family:Arial,sans-serif; color:#000; box-sizing:border-box; padding:1mm;'>";
+    
+    // 1. Cabecera (Nombre): Fondo negro, texto blanco, ocupa ancho completo
+    $full_html .= "<div style='background-color:#000; color:#fff; padding:1.5mm; font-size:3.5mm; font-weight:bold; line-height:1.1; word-wrap:break-word; text-align:center;'>" . htmlspecialchars($name) . "</div>";
+    
+    // 2. Precio: Grande, centrado, tipografía pesada
+    $full_html .= "<div style='text-align:center; padding:3mm 0; font-size:10mm; font-weight:900; line-height:1;'>$" . $price . "</div>";
+    
+    // 3. Footer: Código y Referencia en una línea
+    $full_html .= "<div style='border-top:0.4mm solid #000; padding-top:1mm; display:flex; justify-content:space-between; align-items:center;'>";
+        $full_html .= "<div style='font-size:3.5mm; font-weight:bold;'>" . $barcode . "</div>";
+        $full_html .= "<div style='font-size:3mm;'>" . $ref_text . ": $" . $ref_price . "</div>";
+    $full_html .= "</div>";
 
-// Generamos el JSON para el bridge Thermer
+$full_html .= "</div>";
+
 $response = [
-    "0" => ["type" => 4, "content" => $html_header],
-    "1" => ["type" => 4, "content" => $html_price],
-    "2" => ["type" => 4, "content" => $html_footer],
-    "3" => ["type" => 0, "content" => "\n\n\n", "align" => 1] // Espacio de corte
+    "0" => ["type" => 4, "content" => $full_html],
+    "1" => ["type" => 0, "content" => "\n\n", "align" => 1]
 ];
 
-echo json_encode($response, JSON_FORCE_OBJECT);
+echo json_encode($response, JSON_FORCE_OBJECT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
