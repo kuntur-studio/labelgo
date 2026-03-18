@@ -107,8 +107,9 @@ function enviarImpresion(p) {
   // Enviamos el objeto producto completo y crudo (barcode, name, price, reference, reference_price)
   const payload = encodeURIComponent(JSON.stringify(p));
   
-  // Se invoca al esquema de la app bridge apuntando al nuevo print_helper.php
-  window.location.href = `my.bluetoothprint.scheme://https://nfm.kunturstudio.com.ar/print_helper.php?json=${payload}`;
+  // Se invoca al esquema de la app bridge apuntando al print_helper.php del servidor de la PWA
+  const currentHost = window.location.host; 
+  window.location.href = `my.bluetoothprint.scheme://https://${currentHost}/print_helper.php?json=${payload}`;
 }
 
 async function syncData() {
