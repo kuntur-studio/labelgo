@@ -48,9 +48,9 @@ $$('#btn-scan').on('click', async () => {
     async (decodedText) => {
       playBeep();
       stopScanner();
-      const prod = await db.products.get({ barcode: decodedText });
-      if (prod) {
-        enviarImpresion(prod);
+      const product = await db.products.get({ barcode: decodedText });
+      if (product) {
+        printLabel(product);
       } else {
         app.toast.create({ 
           text: `No encontrado: ${decodedText}`, 
@@ -103,13 +103,157 @@ $$('#btn-toggle-torch').on('click', async () => {
 
 $$('#btn-cancel-scan').on('click', stopScanner);
 
-function enviarImpresion(p) {
-  // Enviamos el objeto producto completo y crudo (barcode, name, price, reference, reference_price)
-  const payload = encodeURIComponent(JSON.stringify(p));
-  
-  // Se invoca al esquema de la app bridge apuntando al print_helper.php del servidor de la PWA
-  const currentHost = window.location.host; 
-  window.location.href = `my.bluetoothprint.scheme://https://${currentHost}/print_helper.php?json=${payload}`;
+async function printLabel(product) {
+    try {
+        // Toast de procesamiento
+        const processingToast = app.toast.create({
+            text: 'Generando etiqueta...',
+            position: 'center',
+            closeTimeout: 2000
+        });
+        processingToast.open();
+
+        // 1. Generar el HTML de la etiqueta en un contenedor temporal
+        const tempContainer = document.createElement('div');
+        tempContainer.id = 'temp-label';
+        tempContainer.style.position = 'absolute';
+        tempContainer.style.left = '-9999px';
+        tempContainer.style.top = '0';
+        tempContainer.style.width = '300px';
+        tempContainer.innerHTML = generateLabelHtml(product);
+        document.body.appendChild(tempContainer);
+
+        // 2. Capturar como imagen usando el helper
+        const imageData = await window.printService.captureLabelAsImage('temp-label');
+        
+        // 3. Enviar a imprimir (con reintentos automáticos)
+        const result = await window.printService.printImage(imageData);
+        
+        // 4. Limpiar el contenedor temporal
+        document.body.removeChild(tempContainer);
+        processingToast.close();
+
+        if (result.success) {
+            // ✅ Éxito
+            app.toast.create({
+                text: 'Etiqueta impresa correctamente',
+                color: 'green',
+                position: 'center',
+                closeTimeout: 2000
+            }).open();
+            
+        } else if (result.fallback) {
+            // ⚠️ Fallback (QR)
+            app.toast.create({
+                text: 'Impresión directa no disponible. Usa QR de respaldo.',
+                color: 'orange',
+                position: 'center',
+                closeTimeout: 2000
+            }).open();
+            
+            showQRFallback(result.fallback);
+        }
+
+    } catch (error) {
+        console.error('Error en impresión:', error);
+        
+        // Limpiar contenedor temporal si existe
+        const temp = document.getElementById('temp-label');
+        if (temp) document.body.removeChild(temp);
+
+        // ❌ Error
+        app.toast.create({
+            text: 'Error al imprimir. Verifica el servicio.',
+            color: 'red',
+            position: 'center',
+            closeTimeout: 2000
+        }).open();
+    }
+}
+
+// Inyecta los estilos de la etiqueta si no están presentes
+function injectLabelStyles() {
+    const styleId = 'labelgo-label-styles';
+    if (document.getElementById(styleId)) return;
+    
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+        .label-container {
+            width: 50mm;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        .label-header {
+            background-color: #000;
+            color: #fff;
+            padding: 1.5mm;
+            font-size: 3.5mm;
+            font-weight: bold;
+            text-align: center;
+        }
+        .label-price {
+            text-align: center;
+            padding: 2mm 0;
+            font-weight: 900;
+            line-height: 1;
+        }
+        .label-footer {
+            border-top: 0.4mm solid #000;
+            padding: 1mm 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .label-barcode {
+            font-size: 3mm;
+            font-weight: bold;
+        }
+        .label-reference {
+            font-size: 2.8mm;
+            text-align: right;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+function generateLabelHtml(product) {
+    // Asegura que los estilos estén inyectados
+    injectLabelStyles();
+    
+    const priceLength = String(product.price).length;
+    const priceFontSize = (priceLength > 8) ? "8mm" : "10mm";
+    
+    // ID único para esta instancia de etiqueta (útil para depuración o referencia futura)
+    const labelId = 'label-' + Date.now();
+    
+    return `
+        <div id="${labelId}" class="label-container">
+            <div class="label-header">${product.name}</div>
+            <div class="label-price" style="font-size:${priceFontSize};">$${product.price}</div>
+            <div class="label-footer">
+                <div class="label-barcode">${product.barcode}</div>
+                <div class="label-reference">${product.reference}: $${product.reference_price}</div>
+            </div>
+        </div>
+    `;
+}
+
+// Función auxiliar para mostrar QR (implementar según necesites)
+function showQRFallback(data) {
+    app.dialog.create({
+        title: 'Código QR de Respaldo',
+        text: 'Escanea este código para imprimir desde otro dispositivo',
+        content: `<div style="text-align: center;">
+            <img src="${data.data}" style="max-width: 200px; margin: 10px auto;">
+        </div>`,
+        buttons: [
+            {
+                text: 'Cerrar',
+                close: true
+            }
+        ]
+    }).open();
 }
 
 async function syncData() {
