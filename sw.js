@@ -1,10 +1,11 @@
-const CACHE_NAME = 'labelgo-v1';
+const CACHE_NAME = 'labelgo-v2';
 
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './assets/js/app.js',
+  './assets/js/print-helper.js',
   './assets/img/background.png',
   './assets/img/icon-512.png',
   './assets/img/icon-192.png',
