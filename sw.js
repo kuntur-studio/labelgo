@@ -1,4 +1,4 @@
-const CACHE_NAME = 'labelgo-v2';
+const CACHE_NAME = 'labelgo-v1';
 
 const ASSETS = [
   './',

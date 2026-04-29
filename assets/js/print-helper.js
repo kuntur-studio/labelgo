@@ -32,31 +32,35 @@ class LocalPrintService {
         for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
             try {
                 // 1. Verificar salud del bridge
-                await this.healthCheck();
+                let response = await this.healthCheck();
+                let { printer_ready } = await response.json();
 
-                // 2. Enviar impresión
-                const response = await fetch(`${this.bridgeUrl}/print-image`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ imagen: imageBase64 })
-                });
+                if (printer_ready) {
+                    // 2. Enviar impresión
+                    response = await fetch(`${this.bridgeUrl}/print-image`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ imagen: imageBase64 })
+                    });
 
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Error en bridge');
+                    let { success } = await response.json();
+
+                    if (!success) {
+                        const error = await response.json();
+                        throw new Error(error.error || 'Error en bridge');
+                    }
+
+                    console.log('✅ Impresión exitosa');
+                    return { success: true };
                 }
-
-                console.log('✅ Impresión exitosa');
-                return { success: true };
 
             } catch (error) {
                 console.warn(`Intento ${attempt} falló:`, error.message);
+                console.log(imageBase64);
                 
                 if (attempt === this.maxRetries) {
-                    // Fallback: mostrar QR con datos para impresión manual
                     return { 
-                        success: false, 
-                        fallback: this.generateFallbackQR(imageBase64)
+                        success: false
                     };
                 }
                 
@@ -72,16 +76,10 @@ class LocalPrintService {
                 method: 'GET',
                 timeout: 3000 
             });
-            return response.ok;
+            return response;
         } catch {
             throw new Error('Bridge no disponible');
         }
-    }
-
-    generateFallbackQR(data) {
-        // Implementar si quieres un QR con los datos de la etiqueta
-        console.warn('⚠️ Usar fallback QR:', data.substring(0, 50) + '...');
-        return { type: 'qr_fallback', data: data };
     }
 
     delay(ms) {

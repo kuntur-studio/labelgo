@@ -48,7 +48,10 @@ $$('#btn-scan').on('click', async () => {
     async (decodedText) => {
       playBeep();
       stopScanner();
-      const product = await db.products.get({ barcode: decodedText });
+
+      // Eliminamos el último dígito (verificador) EAN-13
+    const cleanBarcode = decodedText.slice(0, -1);
+      const product = await db.products.get({ barcode: cleanBarcode });
       if (product) {
         printLabel(product);
       } else {
@@ -119,7 +122,7 @@ async function printLabel(product) {
         tempContainer.style.position = 'absolute';
         tempContainer.style.left = '-9999px';
         tempContainer.style.top = '0';
-        tempContainer.style.width = '300px';
+        tempContainer.style.width = '384px';
         tempContainer.innerHTML = generateLabelHtml(product);
         document.body.appendChild(tempContainer);
 
@@ -142,16 +145,14 @@ async function printLabel(product) {
                 closeTimeout: 2000
             }).open();
             
-        } else if (result.fallback) {
-            // ⚠️ Fallback (QR)
+        } else {
+            // ❌ Error
             app.toast.create({
-                text: 'Impresión directa no disponible. Usa QR de respaldo.',
-                color: 'orange',
+                text: 'Fallo en el servicio de impresión.',
+                color: 'red',
                 position: 'center',
                 closeTimeout: 2000
             }).open();
-            
-            showQRFallback(result.fallback);
         }
 
     } catch (error) {
@@ -180,23 +181,25 @@ function injectLabelStyles() {
     style.id = styleId;
     style.textContent = `
         .label-container {
-            width: 50mm;
+            width: 384px;
             box-sizing: border-box;
             font-family: Arial, sans-serif;
+            image-rendering: pixelated;
         }
         .label-header {
             background-color: #000;
             color: #fff;
             padding: 1.5mm;
-            font-size: 3.5mm;
+            font-size: 28px;
             font-weight: bold;
             text-align: center;
+            line-height: 1.2;
         }
         .label-price {
             text-align: center;
             padding: 2mm 0;
             font-weight: 900;
-            line-height: 1;
+            line-height: 1.3;
         }
         .label-footer {
             border-top: 0.4mm solid #000;
@@ -206,12 +209,13 @@ function injectLabelStyles() {
             align-items: center;
         }
         .label-barcode {
-            font-size: 3mm;
+            font-size: 22px;
             font-weight: bold;
         }
         .label-reference {
-            font-size: 2.8mm;
+            font-size: 20px;
             text-align: right;
+            line-height: 1.2;
         }
     `;
     document.head.appendChild(style);
@@ -222,7 +226,7 @@ function generateLabelHtml(product) {
     injectLabelStyles();
     
     const priceLength = String(product.price).length;
-    const priceFontSize = (priceLength > 8) ? "8mm" : "10mm";
+    const priceFontSize = (priceLength > 8) ? "68px" : "72px";
     
     // ID único para esta instancia de etiqueta (útil para depuración o referencia futura)
     const labelId = 'label-' + Date.now();
@@ -237,23 +241,6 @@ function generateLabelHtml(product) {
             </div>
         </div>
     `;
-}
-
-// Función auxiliar para mostrar QR (implementar según necesites)
-function showQRFallback(data) {
-    app.dialog.create({
-        title: 'Código QR de Respaldo',
-        text: 'Escanea este código para imprimir desde otro dispositivo',
-        content: `<div style="text-align: center;">
-            <img src="${data.data}" style="max-width: 200px; margin: 10px auto;">
-        </div>`,
-        buttons: [
-            {
-                text: 'Cerrar',
-                close: true
-            }
-        ]
-    }).open();
 }
 
 async function syncData() {
