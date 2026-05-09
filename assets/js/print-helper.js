@@ -40,14 +40,15 @@ class LocalPrintService {
                     response = await fetch(`${this.bridgeUrl}/print-image`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ imagen: imageBase64 })
+                        body: JSON.stringify({ imagen: imageBase64 }),
+                        timeout: 3000
                     });
 
-                    let { success } = await response.json();
+                    let data = await response.json();
+                    let {success} = data;
 
                     if (!success) {
-                        const error = await response.json();
-                        throw new Error(error.error || 'Error en bridge');
+                        throw new Error(data.error || 'Error en bridge');
                     }
 
                     console.log('✅ Impresión exitosa');
