@@ -107,7 +107,7 @@ $$('#btn-toggle-torch').on('click', async () => {
 $$('#btn-cancel-scan').on('click', stopScanner);
 
 async function printLabel(product) {
-    try {
+    // try {
         // Toast de procesamiento
         const processingToast = app.toast.create({
             text: 'Generando etiqueta...',
@@ -155,21 +155,21 @@ async function printLabel(product) {
             }).open();
         }
 
-    } catch (error) {
-        console.error('Error en impresión:', error);
+    // } catch (error) {
+    //     console.error('Error en impresión:', error);
         
         // Limpiar contenedor temporal si existe
         const temp = document.getElementById('temp-label');
         if (temp) document.body.removeChild(temp);
 
-        // ❌ Error
-        app.toast.create({
-            text: 'Error al imprimir. Verifica el servicio.',
-            color: 'red',
-            position: 'center',
-            closeTimeout: 2000
-        }).open();
-    }
+    //     // ❌ Error
+    //     app.toast.create({
+    //         text: 'Error al imprimir. Verifica el servicio.',
+    //         color: 'red',
+    //         position: 'center',
+    //         closeTimeout: 2000
+    //     }).open();
+    // }
 }
 
 // Inyecta los estilos de la etiqueta si no están presentes
