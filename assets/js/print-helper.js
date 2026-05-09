@@ -29,8 +29,8 @@ class LocalPrintService {
      * Envía la imagen al bridge para imprimir
      */
     async printImage(imageBase64) {
-        for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
-            try {
+        //for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+            //try {
                 // 1. Verificar salud del bridge
                 let response = await this.healthCheck();
                 let { printer_ready } = await response.json();
@@ -40,22 +40,24 @@ class LocalPrintService {
                     response = await fetch(`${this.bridgeUrl}/print-image`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ imagen: imageBase64 }),
-                        timeout: 3000
+                        body: JSON.stringify({ imagen: imageBase64 })
                     });
 
                     let data = await response.json();
                     let {success} = data;
 
                     if (!success) {
-                        throw new Error(data.error || 'Error en bridge');
+                        //throw new Error(data.error || 'Error en bridge');
+                        return { 
+                            success: false
+                        };
                     }
 
                     console.log('✅ Impresión exitosa');
                     return { success: true };
                 }
 
-            } catch (error) {
+            /*} catch (error) {
                 console.warn(`Intento ${attempt} falló:`, error.message);
                 console.log(imageBase64);
                 
@@ -67,8 +69,8 @@ class LocalPrintService {
                 
                 // Esperar antes de reintentar (backoff exponencial)
                 await this.delay(1000 * Math.pow(2, attempt));
-            }
-        }
+            }*/
+        //}
     }
 
     async healthCheck() {
