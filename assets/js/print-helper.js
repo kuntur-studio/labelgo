@@ -29,6 +29,12 @@ class LocalPrintService {
      * Envía la imagen al bridge para imprimir
      */
     async printImage(imageBase64) {
+        // Dejo el bucle y el try/catch aunque ahora no funciona bien por el problema explicado en app.js
+        // no puedo dejar activo el bucle de reintento porque no puedo capturar un error real, sería útil
+        // si logro que el servidor web interno de la app devolviera el JSON de respuesta cuando imprime
+        // correctamente.
+        // Hay que revisar CORS y específicamente ver si el servidor web funciona bien con un certificado
+        // autofirmado para evitar mixed content acá.
         //for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
             //try {
                 // 1. Verificar salud del bridge

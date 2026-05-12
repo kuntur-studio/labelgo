@@ -107,6 +107,9 @@ $$('#btn-toggle-torch').on('click', async () => {
 $$('#btn-cancel-scan').on('click', stopScanner);
 
 async function printLabel(product) {
+    // Dejo el try/catch para resguardar el código pero ahora no funciona bien porque el servidor web interno de la app bridge
+    // por alguna razón que supongo que tiene que ver con CORS no devuelve la respuesta, se aborta la conexión y provoca un
+    // error que captura el try aunque el bridge imprime correctamente la etiqueta.
     // try {
         // Toast de procesamiento
         const processingToast = app.toast.create({
@@ -116,7 +119,7 @@ async function printLabel(product) {
         });
         processingToast.open();
 
-        // 1. Generar el HTML de la etiqueta en un contenedor temporal
+        // Generar el HTML de la etiqueta en un contenedor temporal
         const tempContainer = document.createElement('div');
         tempContainer.id = 'temp-label';
         tempContainer.style.position = 'absolute';
@@ -126,14 +129,15 @@ async function printLabel(product) {
         tempContainer.innerHTML = generateLabelHtml(product);
         document.body.appendChild(tempContainer);
 
-        // 2. Capturar como imagen usando el helper
+        // Capturar como imagen usando el helper
         const imageData = await window.printService.captureLabelAsImage('temp-label');
+
+        // Limpiar el contenedor temporal
+        document.body.removeChild(tempContainer);
         
-        // 3. Enviar a imprimir (con reintentos automáticos)
+        // Enviar a imprimir (con reintentos automáticos)
         const result = await window.printService.printImage(imageData);
         
-        // 4. Limpiar el contenedor temporal
-        document.body.removeChild(tempContainer);
         processingToast.close();
 
         if (result.success) {
@@ -158,9 +162,6 @@ async function printLabel(product) {
     // } catch (error) {
     //     console.error('Error en impresión:', error);
         
-        // Limpiar contenedor temporal si existe
-        const temp = document.getElementById('temp-label');
-        if (temp) document.body.removeChild(temp);
 
     //     // ❌ Error
     //     app.toast.create({
