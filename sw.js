@@ -1,4 +1,4 @@
-const CACHE_NAME = 'labelgo-v1.1';
+const CACHE_NAME = 'labelgo-v1.2';
 
 const ASSETS = [
   './',
@@ -19,7 +19,6 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', e => {
-  self.skipWaiting(); 
   e.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
@@ -31,6 +30,7 @@ self.addEventListener('activate', e => {
       keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
     ))
   );
+  self.clients.claim(); 
 });
 
 self.addEventListener('fetch', e => {
@@ -39,4 +39,10 @@ self.addEventListener('fetch', e => {
       return response || fetch(e.request);
     })
   );
+});
+
+self.addEventListener('message', e => {
+  if (e.data && e.data.action === 'skipWaiting') {
+    self.skipWaiting();
+  }
 });

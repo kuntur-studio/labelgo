@@ -48,19 +48,10 @@ $$('#btn-scan').on('click', async () => {
     async (decodedText) => {
       playBeep();
       stopScanner();
-
-      // Eliminamos el último dígito (verificador) EAN-13
-    const cleanBarcode = decodedText.slice(0, -1);
-      const product = await db.products.get({ barcode: cleanBarcode });
-      if (product) {
-        printLabel(product);
-      } else {
-        app.toast.create({ 
-          text: `No encontrado: ${decodedText}`, 
-          color: 'red', 
-          closeTimeout: 3000 
-        }).open();
-      }
+      
+      // Para el escaneo por cámara: se elimina el último dígito (verificador) EAN-13
+      const cleanBarcode = decodedText.trim().slice(0, -1);
+      processAndPrintBarcode(cleanBarcode, decodedText);
     }
   ).then(() => {
     // Aplicar el estado guardado una vez que la cámara inicia
@@ -105,6 +96,23 @@ $$('#btn-toggle-torch').on('click', async () => {
 });
 
 $$('#btn-cancel-scan').on('click', stopScanner);
+
+/**
+ * BUSCA EL PRODUCTO POR SU CÓDIGO YA TRATADO Y DISPARA LA IMPRESIÓN
+ */
+async function processAndPrintBarcode(cleanBarcode, originalTextForToast) {
+  const product = await db.products.get({ barcode: cleanBarcode });
+  
+  if (product) {
+    printLabel(product);
+  } else {
+    app.toast.create({ 
+      text: `No encontrado: ${originalTextForToast}`, 
+      color: 'red', 
+      closeTimeout: 3000 
+    }).open();
+  }
+}
 
 async function printLabel(product) {
     // Dejo el try/catch para resguardar el código pero ahora no funciona bien porque el servidor web interno de la app bridge
@@ -225,7 +233,6 @@ function injectLabelStyles() {
 function generateLabelHtml(product) {
     // Asegura que los estilos estén inyectados
     injectLabelStyles();
-    
     const priceLength = String(product.price).length;
     const priceFontSize = (priceLength > 8) ? "68px" : "72px";
     
@@ -283,8 +290,105 @@ async function syncData() {
 }
 
 $$('#btn-sync').on('click', syncData);
+
 $$('#save-config').on('click', async () => {
   await db.config.put({ key: "dbfileurl", value: $$('#url-csv').val() });
   app.sheet.close('.config-sheet');
   syncData();
+});
+
+/* --- LÓGICA DE INGRESO MANUAL POR TECLADO --- */
+
+$$('#btn-keyboard').on('click', function () {
+  $$('#input-barcode').val(''); 
+  app.sheet.open('.barcode-sheet');
+});
+
+$$('#btn-submit-manual').on('click', function () {
+  const code = $$('#input-barcode').val();
+  if (!code) {
+    app.toast.create({ text: 'Por favor, ingrese un código', color: 'orange', closeTimeout: 2000 }).open();
+    return;
+  }
+  app.sheet.close('.barcode-sheet');
+  
+  // Para el ingreso manual: se limpia el espacio en blanco pero NO se quita ningún dígito
+  const cleanManualCode = code.trim();
+  processAndPrintBarcode(cleanManualCode, cleanManualCode);
+});
+
+/* --- MENÚ DE OPCIONES Y ACTUALIZACIÓN PWA --- */
+
+$$('#btn-config').on('click', function () {
+  app.actions.create({
+    buttons: [
+      [
+        {
+          text: 'Opciones de Configuración',
+          label: true
+        },
+        {
+          text: 'URL archivo CSV',
+          icon: '<i class="f7-icons size-22">link</i>',
+          onClick: function () {
+            app.sheet.open('.config-sheet');
+          }
+        },
+        {
+          text: 'Actualizar la app',
+          icon: '<i class="f7-icons size-22">arrow_clockwise</i>',
+          color: 'blue',
+          onClick: function () {
+            forcePWAUpdate();
+          }
+        }
+      ],
+      [
+        {
+          text: 'Cancelar',
+          color: 'red'
+        }
+      ]
+    ]
+  }).open();
+});
+
+function forcePWAUpdate() {
+  if ('serviceWorker' in navigator) {
+    app.dialog.preloader('Buscando actualizaciones...');
+    
+    navigator.serviceWorker.getRegistration().then(registration => {
+      if (registration) {
+        registration.update().then(() => {
+          if (registration.waiting) {
+            app.dialog.close();
+            app.dialog.preloader('Instalando nueva versión...');
+            registration.waiting.postMessage({ action: 'skipWaiting' });
+          } else {
+            app.dialog.close();
+            app.toast.create({
+              text: 'La app ya está en la versión más reciente.',
+              color: 'green',
+              closeTimeout: 2500
+            }).open();
+          }
+        }).catch(err => {
+          app.dialog.close();
+          app.toast.create({ text: 'Error al buscar actualizaciones', color: 'red', closeTimeout: 2000 }).open();
+        });
+      } else {
+        app.dialog.close();
+      }
+    });
+  } else {
+    app.toast.create({ text: 'PWA no soportada en este navegador', color: 'red', closeTimeout: 2000 }).open();
+  }
+}
+
+let refreshing = false;
+navigator.serviceWorker.addEventListener('controllerchange', () => {
+  if (!refreshing) {
+    refreshing = true;
+    window.location.reload();
+  }
 });

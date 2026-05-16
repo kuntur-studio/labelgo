@@ -42,9 +42,9 @@
       font-weight: 800;
     }
 
-    /* BLOQUE 2: Botones principales */
+    /* BLOQUE 2: Botones principales (Escaneo y Teclado arriba) */
     .body-nfm {
-      padding: 40px 0;
+      padding: 30px 0;
       display: flex;
       justify-content: center;
       gap: 50px;
@@ -63,7 +63,6 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       cursor: pointer;
     }
-    .btn-sync { background-color: var(--green-nfm); }
     .btn-scan { background-color: var(--blue-nfm); }
     .btn-circle i { font-size: 38px; }
 
@@ -77,6 +76,7 @@
       padding: 0 15px;
       box-sizing: border-box;
       max-height: 335px;
+      position: relative;
     }
     .repositor-img {
       width: 100%;
@@ -86,9 +86,19 @@
       box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     }
 
+    /* Contenedor flotante para el botón de sincronización sobre la imagen */
+    .sync-container {
+      position: absolute;
+      bottom: -42px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
+    .btn-sync { background-color: var(--green-nfm); }
+
     /* BLOQUE 4: Pie de página */
     .footer-nfm {
-      height: 70px;
+      height: 85px;
       background-color: white;
       display: flex;
       align-items: center;
@@ -156,7 +166,7 @@
     .btn-scanner-action i { font-size: 35px; }
 
     /* Estilos Modal Sheet */
-    .config-sheet {
+    .config-sheet, .barcode-sheet {
       height: auto;
       --f7-sheet-border-radius: 20px 20px 0 0;
     }
@@ -186,20 +196,25 @@
           </div>
 
           <div class="body-nfm">
-            <button class="btn-circle btn-sync ripple-color-white" id="btn-sync">
-              <i class="f7-icons">arrow_2_circlepath</i>
-            </button>
             <button class="btn-circle btn-scan ripple-color-white" id="btn-scan">
               <i class="f7-icons">barcode_viewfinder</i>
+            </button>
+            <button class="btn-circle color-red ripple-color-white" id="btn-keyboard">
+              <i class="f7-icons">keyboard</i>
             </button>
           </div>
 
           <div class="img-container">
             <img src="assets/img/background.png" class="repositor-img" alt="Repositor">
+            <div class="sync-container">
+              <button class="btn-circle btn-sync ripple-color-white" id="btn-sync">
+                <i class="f7-icons">arrow_2_circlepath</i>
+              </button>
+            </div>
           </div>
 
           <div class="footer-nfm">
-            <button class="config-btn sheet-open ripple-color-gray" data-sheet=".config-sheet">
+            <button class="config-btn ripple-color-gray" id="btn-config">
               <i class="f7-icons">gear_alt_fill</i>
             </button>
           </div>
@@ -226,6 +241,30 @@
                 </ul>
               </div>
               <button class="button button-fill button-large margin-top" id="save-config">Guardar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sheet-modal barcode-sheet">
+          <div class="sheet-modal-inner">
+            <div class="block">
+              <div class="display-flex justify-content-space-between align-items-center">
+                <h3 class="margin-0">Ingreso Manual</h3>
+                <a class="link sheet-close" href="#">Cancelar</a>
+              </div>
+              <div class="list no-hairlines-md">
+                <ul>
+                  <li class="item-content item-input">
+                    <div class="item-inner">
+                      <div class="item-title item-label">Código de barras</div>
+                      <div class="item-input-wrap">
+                        <input type="tel" id="input-barcode" placeholder="Ingrese el código aquí" autofocus>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <button class="button button-fill button-large margin-top" id="btn-submit-manual">Procesar Código</button>
             </div>
           </div>
         </div>
